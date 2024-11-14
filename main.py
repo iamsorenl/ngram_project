@@ -46,7 +46,7 @@ def main():
     
     # Print the first 50 features to verify
     for sentence in features[:50]:
-        print(sentence)
+        print(sentence, '\n')   
 
 if __name__ == "__main__":
     main()
