@@ -36,6 +36,12 @@ def main():
     # Count n-grams
     ngram_model.count_ngrams()
 
+    # print first 10 ngrams
+    for i, (ngram, count) in enumerate(ngram_model.ngram_counts.items()):
+        print(ngram, count)
+        if i == 9:
+            break
+
     # Output results
     print("Number of unique n-grams:", len(ngram_model.ngram_counts))
     print("Total n-gram count:", sum(ngram_model.ngram_counts.values()))

@@ -6,7 +6,7 @@ class Ngram:
         self.preprocessed_sentences = []  # List to store preprocessed sentences
 
     def preprocess_and_count(self, preprocessed_sentences):
-        """Counts word frequencies and handles <UNK> replacement (internal use only)."""
+        """Counts word frequencies and handles <UNK> replacement."""
         self.word_frequencies = {}
         for sentence in preprocessed_sentences:
             for word in sentence:
@@ -25,7 +25,7 @@ class Ngram:
             del self.word_frequencies[word]
 
     def tokenize_and_prepare(self, data):
-        """Reads data, tokenizes it, and adds <START> and <STOP> tokens based on n-gram type (internal use only)."""
+        """Reads data, tokenizes it, and adds <START> and <STOP> tokens based on n-gram type."""
         self.preprocessed_sentences = []
         with open(data, 'r') as file:
             lines = file.readlines()
@@ -47,3 +47,8 @@ class Ngram:
             for i in range(len(sentence) - self.n + 1):
                 ngram = tuple(sentence[i:i + self.n])
                 self.ngram_counts[ngram] = self.ngram_counts.get(ngram, 0) + 1
+
+    def calculate_perplexity(self, data):
+        """Calculates the perplexity of the model on a given test data."""
+        model = Ngram(self.n)
+        pass
