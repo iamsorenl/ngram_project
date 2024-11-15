@@ -31,7 +31,7 @@ class Ngram:
 
     def replace_with_unk(self, preprocessed_sentences):
         """Replaces infrequent words with <UNK> based on the counted word frequencies and updates word_frequencies_unk."""
-        self.word_frequencies_unk = {}  # Reset the dictionary for <UNK> frequencies
+        #self.word_frequencies_unk = {}  # Reset the dictionary for <UNK> frequencies
 
         for i, sentence in enumerate(preprocessed_sentences):
             # Replace infrequent words with <UNK> in the sentence (<START> doesnt have a frequency)
@@ -46,7 +46,6 @@ class Ngram:
                     self.word_frequencies_unk[token] = self.word_frequencies_unk.get(token, 0) + 1
 
         return preprocessed_sentences
-
 
     def count_ngrams(self, preprocessed_sentences):
         """Counts n-grams in the tokenized sentences."""
@@ -64,7 +63,7 @@ class Ngram:
                     self.trigram_counts[trigram] = self.trigram_counts.get(trigram, 0) + 1
 
     def calculate_probability(self, ngram):
-        """Calculates the probability of a given n-gram."""
+        """Calculates the probability of a given n-gram with handling for the special trigram case."""
         if len(ngram) == 1:  # Unigram
             count_ngram = self.unigram_counts.get(ngram, 0)
             total_unigrams = sum(self.unigram_counts.values())
@@ -74,18 +73,26 @@ class Ngram:
             count_preceding_word = self.unigram_counts.get((ngram[0],), 0)
             return count_ngram / count_preceding_word if count_preceding_word > 0 else 0
         elif len(ngram) == 3:  # Trigram
+            # Special case: Use bigram probability for the first word following <START>
+            if ngram[0] == "<START>":
+                count_bigram = self.bigram_counts.get((ngram[0], ngram[1]), 0)
+                count_start = self.unigram_counts.get((ngram[0],), 0)
+                return count_bigram / count_start if count_start > 0 else 0
+
+            # Regular trigram case
             count_ngram = self.trigram_counts.get(ngram, 0)
             preceding_bigram = (ngram[0], ngram[1])
             count_preceding_bigram = self.bigram_counts.get(preceding_bigram, 0)
             return count_ngram / count_preceding_bigram if count_preceding_bigram > 0 else 0
         return 0  # Unknown n-gram probability
+
     
-    def calculate_perplexity(self, preprocessed_sentences):
+    def calculate_perplexity(self, sentences):
         """Calculates the perplexity of the n-gram model for a list of tokenized sentences."""
-        N = sum(len(sentence) - (self.n - 1) for sentence in preprocessed_sentences)  # Number of words, adjusted for n-grams
+        N = sum(len(sentence) - (self.n - 1) for sentence in sentences)  # Number of words, adjusted for n-grams
         log_sum = 0
 
-        for sentence in preprocessed_sentences:
+        for sentence in sentences:
             for i in range(self.n - 1, len(sentence)):
                 ngram = tuple(sentence[i - self.n + 1:i + 1])
                 probability = self.calculate_probability(ngram)

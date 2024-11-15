@@ -27,16 +27,31 @@ def main():
     # Tokenize and prepare the training data
     training_data_file = "A2-Data/1b_benchmark.train.tokens"
     train_sentences = ngram_model.tokenize_and_count(training_data_file)
-    print("train_sentence before:", train_sentences[0])
+    # print("train_sentence before:", train_sentences[0])
     train_sentences = ngram_model.replace_with_unk(train_sentences)
-    print("train_sentence after:", train_sentences[0])
+    # print("train_sentence after:", train_sentences[0])
 
     # frequencies
     print("word frequency length:", len(ngram_model.word_frequencies))
     print("word frequency length with <UNK>:", len(ngram_model.word_frequencies_unk))
 
-     # set up example file
-    example_file = "hdtv"
+    # count ngrams in the training data
+    ngram_model.count_ngrams(train_sentences)
+
+    # length of each ngram
+    print("unigram length:", len(ngram_model.unigram_counts))
+    print("bigram length:", len(ngram_model.bigram_counts))
+    print("trigram length:", len(ngram_model.trigram_counts))
+
+    # calculate perplexity
+    #perplexity_train = ngram_model.calculate_perplexity(train_sentences)
+    #print(f"Perplexity on training data: {perplexity_train}")
+    
+    # HDTV test
+    example_sentence = [["<START>", "HDTV", ".", "<STOP>"]]
+    perplexity_example = ngram_model.calculate_perplexity(example_sentence)
+    print(f"Perplexity of the example 'HDTV .': {perplexity_example}")
+
 
 if __name__ == "__main__":
     main()
