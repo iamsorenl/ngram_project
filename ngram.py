@@ -54,7 +54,7 @@ class Ngram:
     def calculate_probability(self, ngram):
         """Calculates the probability of a given n-gram."""
         if len(ngram) == 1:  # Unigram
-            count_ngram = self.unigram_counts[ngram]  # Count of the n-gram
+            count_ngram = self.unigram_counts.get(ngram, 0)  # Count of the n-gram
             total_unigrams = sum(self.unigram_counts.values()) # denominator
             if total_unigrams == 0:  # Handle case where there are no unigrams
                 return 0
