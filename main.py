@@ -24,6 +24,7 @@ def main():
     # Initialize the Ngram model
     ngram_model = Ngram(n)
 
+    '''
     # Path to the training data (adjust as needed)
     train_data = "A2-Data/1b_benchmark.train.tokens"
 
@@ -35,16 +36,27 @@ def main():
 
     # Count n-grams
     ngram_model.count_ngrams()
+    '''
 
-    # print first 10 ngrams
-    for i, (ngram, count) in enumerate(ngram_model.ngram_counts.items()):
-        print(ngram, count)
+    # set up example file
+    example_file = "hdtv"
+
+    preprocessed_sentences = ngram_model.tokenize_and_prepare(example_file)
+
+    print("preprocessed_sentence: ", preprocessed_sentences)
+
+    '''
+    # print the first 10 bigram counts
+    for i, (unigram, count) in enumerate(ngram_model.unigram_counts.items()):
+        #print(unigram, count)
+        # probability of bigram
+        probability = ngram_model.calculate_probability(unigram)
+        print("probability of: ", unigram, " is ", probability)
+        # print("probability of: ", unigram, " is ", ngram_model.calculate_probability(unigram))
         if i == 9:
             break
+        '''
 
-    # Output results
-    print("Number of unique n-grams:", len(ngram_model.ngram_counts))
-    print("Total n-gram count:", sum(ngram_model.ngram_counts.values()))
 
 if __name__ == "__main__":
     main()

@@ -1,9 +1,10 @@
 class Ngram:
     def __init__(self, n):
         self.n = n  # Specifies the n-gram order (1 for unigram, 2 for bigram, etc.)
-        self.ngram_counts = {}  # Dictionary to store counts of n-grams
+        self.unigram_counts = {}  # Dictionary to store counts of unigrams
+        self.bigram_counts = {}  # Dictionary to store counts of bigrams
+        self.trigram_counts = {}  # Dictionary to store counts of trigrams
         self.word_frequencies = {}  # Dictionary to store word frequencies (including <UNK> handling)
-        self.preprocessed_sentences = []  # List to store preprocessed sentences
 
     def preprocess_and_count(self, preprocessed_sentences):
         """Counts word frequencies and handles <UNK> replacement."""
@@ -25,30 +26,40 @@ class Ngram:
             del self.word_frequencies[word]
 
     def tokenize_and_prepare(self, data):
-        """Reads data, tokenizes it, and adds <START> and <STOP> tokens based on n-gram type."""
-        self.preprocessed_sentences = []
+        """Reads data, tokenizes it, and adds <START> and <STOP> tokens."""
+        preprocessed_sentences = []
         with open(data, 'r') as file:
             lines = file.readlines()
             for line in lines:
                 tokens = line.strip().split()  # Tokenize by whitespace
-
-                # Add <START> and <STOP> tokens based on the n-gram order
-                if self.n == 3:
-                    tokens = ["<START>", "<START>"] + tokens  # Add two <START> tokens for trigrams
-                elif self.n == 2:
-                    tokens = ["<START>"] + tokens  # Add one <START> token for bigrams
-                
-                tokens.append("<STOP>")  # Add <STOP> token
-                self.preprocessed_sentences.append(tokens)
+                tokens = ["<START>"] + tokens + ["<STOP>"]  # Add one <START> and one <STOP> token
+                preprocessed_sentences.append(tokens)
+        return preprocessed_sentences
 
     def count_ngrams(self):
         """Counts n-grams in the tokenized sentences."""
         for sentence in self.preprocessed_sentences:
-            for i in range(len(sentence) - self.n + 1):
-                ngram = tuple(sentence[i:i + self.n])
-                self.ngram_counts[ngram] = self.ngram_counts.get(ngram, 0) + 1
+            for i in range(len(sentence)):
+                unigram = tuple(sentence[i:i + 1])
+                self.unigram_counts[unigram] = self.unigram_counts.get(unigram, 0) + 1
 
-    def calculate_perplexity(self, data):
-        """Calculates the perplexity of the model on a given test data."""
-        model = Ngram(self.n)
-        pass
+                if i < len(sentence) - 1:
+                    bigram = tuple(sentence[i:i + 2])
+                    self.bigram_counts[bigram] = self.bigram_counts.get(bigram, 0) + 1
+
+                if i < len(sentence) - 2:
+                    trigram = tuple(sentence[i:i + 3])
+                    self.trigram_counts[trigram] = self.trigram_counts.get(trigram, 0) + 1
+
+    def calculate_probability(self, ngram):
+        """Calculates the probability of a given n-gram."""
+        if len(ngram) == 1:  # Unigram
+            count_ngram = self.unigram_counts[ngram]  # Count of the n-gram
+            total_unigrams = sum(self.unigram_counts.values()) # denominator
+            if total_unigrams == 0:  # Handle case where there are no unigrams
+                return 0
+            print("count_ngram: ", ngram, count_ngram)
+            print("total unigrams: ", total_unigrams)
+            return count_ngram / total_unigrams
+        return 0  # Return zero probability for unknown n-grams
+
