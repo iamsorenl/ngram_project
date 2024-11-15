@@ -6,37 +6,47 @@ class Ngram:
         self.unigram_counts = {}  # Dictionary to store counts of unigrams
         self.bigram_counts = {}  # Dictionary to store counts of bigrams
         self.trigram_counts = {}  # Dictionary to store counts of trigrams
-        self.word_frequencies = {}  # Dictionary to store word frequencies (including <UNK> handling)
+        self.word_frequencies_unk = {}  # Dictionary to store word frequencies (including <UNK> handling)
+        self.word_frequencies = {}  # Dictionary to store word frequencies
 
-    def preprocess_and_count(self, preprocessed_sentences):
-        """Counts word frequencies and handles <UNK> replacement."""
-        self.word_frequencies = {}
-        for sentence in preprocessed_sentences:
-            for word in sentence:
-                if word != "<START>":  # Exclude <START> tokens from counting
-                    self.word_frequencies[word] = self.word_frequencies.get(word, 0) + 1
-
-        # Replace words with <UNK> if their frequency is less than 3
-        words_to_delete = []
-        for word, count in list(self.word_frequencies.items()):
-            if count < 3:
-                self.word_frequencies["<UNK>"] = self.word_frequencies.get("<UNK>", 0) + 1
-                words_to_delete.append(word)
-
-        # Remove the words with less than 3 occurrences
-        for word in words_to_delete:
-            del self.word_frequencies[word]
-
-    def tokenize_and_prepare(self, data):
-        """Reads data, tokenizes it, and adds <START> and <STOP> tokens."""
+    def tokenize_and_count(self, data):
+        """Tokenizes sentences, adds <START> and <STOP>, and counts word frequencies in one pass."""
         preprocessed_sentences = []
+        self.word_frequencies = {}
+
         with open(data, 'r') as file:
             lines = file.readlines()
             for line in lines:
-                tokens = line.strip().split()  # Tokenize by whitespace
-                tokens = ["<START>"] + tokens + ["<STOP>"]  # Add one <START> and one <STOP> token
+                tokens = line.strip().split()
+                # Add <START> and <STOP> tokens
+                tokens = ["<START>"] + tokens + ["<STOP>"]
                 preprocessed_sentences.append(tokens)
+
+                # Count word frequencies (excluding <START>)
+                for token in tokens:
+                    if token != "<START>":
+                        self.word_frequencies[token] = self.word_frequencies.get(token, 0) + 1
+
         return preprocessed_sentences
+
+    def replace_with_unk(self, preprocessed_sentences):
+        """Replaces infrequent words with <UNK> based on the counted word frequencies and updates word_frequencies_unk."""
+        self.word_frequencies_unk = {}  # Reset the dictionary for <UNK> frequencies
+
+        for i, sentence in enumerate(preprocessed_sentences):
+            # Replace infrequent words with <UNK> in the sentence (<START> doesnt have a frequency)
+            preprocessed_sentences[i] = [
+                token if token == "<START>" or self.word_frequencies.get(token, 0) >= 3 else "<UNK>"
+                for token in sentence
+            ]
+
+            # Update frequencies for <UNK> replaced sentences
+            for token in preprocessed_sentences[i]:
+                if token != "<START>":  # Exclude <START> tokens from counting
+                    self.word_frequencies_unk[token] = self.word_frequencies_unk.get(token, 0) + 1
+
+        return preprocessed_sentences
+
 
     def count_ngrams(self, preprocessed_sentences):
         """Counts n-grams in the tokenized sentences."""
@@ -56,26 +66,19 @@ class Ngram:
     def calculate_probability(self, ngram):
         """Calculates the probability of a given n-gram."""
         if len(ngram) == 1:  # Unigram
-            count_ngram = self.unigram_counts.get(ngram, 0)  # Count of the unigram
-            total_unigrams = sum(self.unigram_counts.values())  # Total count of unigrams
-            if total_unigrams == 0:  # Handle case where there are no unigrams
-                return 0
-            return count_ngram / total_unigrams
+            count_ngram = self.unigram_counts.get(ngram, 0)
+            total_unigrams = sum(self.unigram_counts.values())
+            return count_ngram / total_unigrams if total_unigrams > 0 else 0
         elif len(ngram) == 2:  # Bigram
-            count_ngram = self.bigram_counts.get(ngram, 0)  # Count of the bigram
-            preceding_word = (ngram[0],)  # Access preceding word as a tuple
-            count_preceding_word = self.unigram_counts.get(preceding_word, 0)  # Access the unigram count
-            if count_preceding_word == 0:  # Avoid division by zero
-                return 0
-            return count_ngram / count_preceding_word
+            count_ngram = self.bigram_counts.get(ngram, 0)
+            count_preceding_word = self.unigram_counts.get((ngram[0],), 0)
+            return count_ngram / count_preceding_word if count_preceding_word > 0 else 0
         elif len(ngram) == 3:  # Trigram
-            count_ngram = self.trigram_counts.get(ngram, 0) # Count of the trigram
-            preceding_bigram = (ngram[0], ngram[1]) # Access preceding bigram as a tuple
+            count_ngram = self.trigram_counts.get(ngram, 0)
+            preceding_bigram = (ngram[0], ngram[1])
             count_preceding_bigram = self.bigram_counts.get(preceding_bigram, 0)
-            if count_preceding_bigram == 0: # Avoid division by zero
-                return 0
-            return count_ngram / count_preceding_bigram
-        return 0  # Return zero probability for unknown n-grams
+            return count_ngram / count_preceding_bigram if count_preceding_bigram > 0 else 0
+        return 0  # Unknown n-gram probability
     
     def calculate_perplexity(self, preprocessed_sentences):
         """Calculates the perplexity of the n-gram model for a list of tokenized sentences."""

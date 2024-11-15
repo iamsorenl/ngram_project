@@ -24,21 +24,19 @@ def main():
     # Initialize the Ngram model
     ngram_model = Ngram(n)
 
-    # Tokenize and prepare the training data (assuming 'train_data.txt' contains your training text)
+    # Tokenize and prepare the training data
     training_data_file = "A2-Data/1b_benchmark.train.tokens"
-    preprocessed_training = ngram_model.tokenize_and_prepare(training_data_file)
-    ngram_model.count_ngrams(preprocessed_training)
+    train_sentences = ngram_model.tokenize_and_count(training_data_file)
+    print("train_sentence before:", train_sentences[0])
+    train_sentences = ngram_model.replace_with_unk(train_sentences)
+    print("train_sentence after:", train_sentences[0])
+
+    # frequencies
+    print("word frequency length:", len(ngram_model.word_frequencies))
+    print("word frequency length with <UNK>:", len(ngram_model.word_frequencies_unk))
 
      # set up example file
     example_file = "hdtv"
-
-    preprocessed_example = ngram_model.tokenize_and_prepare(example_file)
-
-    print("preprocessed_sentence: ", preprocessed_example)
-
-    # Calculate perplexity for the example
-    perplexity = ngram_model.calculate_perplexity(preprocessed_example)
-    print(f"Perplexity of the {ngram_type} model for 'HDTV .': {perplexity}")
 
 if __name__ == "__main__":
     main()
