@@ -1,3 +1,5 @@
+import numpy as np
+
 class Ngram:
     def __init__(self, n):
         self.n = n  # Specifies the n-gram order (1 for unigram, 2 for bigram, etc.)
@@ -74,5 +76,27 @@ class Ngram:
                 return 0
             return count_ngram / count_preceding_bigram
         return 0  # Return zero probability for unknown n-grams
+    
+    def calculate_perplexity(self, preprocessed_sentences):
+        """Calculates the perplexity of the n-gram model for a list of tokenized sentences."""
+        N = sum(len(sentence) - (self.n - 1) for sentence in preprocessed_sentences)  # Number of words, adjusted for n-grams
+        log_sum = 0
+
+        for sentence in preprocessed_sentences:
+            for i in range(self.n - 1, len(sentence)):
+                ngram = tuple(sentence[i - self.n + 1:i + 1])
+                probability = self.calculate_probability(ngram)
+
+                if probability > 0:
+                    log_sum += -np.log2(probability)
+                else:
+                    # If the probability is zero, it means the n-gram was unseen in training
+                    # Return infinite perplexity (or use a small smoothing constant as desired)
+                    return float('inf')
+
+        # Calculate perplexity
+        perplexity = 2 ** (log_sum / N)
+        return perplexity
+
 
 

@@ -24,48 +24,21 @@ def main():
     # Initialize the Ngram model
     ngram_model = Ngram(n)
 
-    '''
-    # Path to the training data (adjust as needed)
-    train_data = "A2-Data/1b_benchmark.train.tokens"
+    # Tokenize and prepare the training data (assuming 'train_data.txt' contains your training text)
+    training_data_file = "A2-Data/1b_benchmark.train.tokens"
+    preprocessed_training = ngram_model.tokenize_and_prepare(training_data_file)
+    ngram_model.count_ngrams(preprocessed_training)
 
-    # Tokenize and prepare the data
-    ngram_model.tokenize_and_prepare(train_data)
-
-    # Preprocess to count word frequencies and handle <UNK>
-    ngram_model.preprocess_and_count(ngram_model.preprocessed_sentences)
-
-    # Count n-grams
-    ngram_model.count_ngrams()
-    '''
-
-    # set up example file
+     # set up example file
     example_file = "hdtv"
 
-    preprocessed_sentences = ngram_model.tokenize_and_prepare(example_file)
+    preprocessed_example = ngram_model.tokenize_and_prepare(example_file)
 
-    print("preprocessed_sentence: ", preprocessed_sentences)
+    print("preprocessed_sentence: ", preprocessed_example)
 
-    ngram_model.count_ngrams(preprocessed_sentences)
-
-    # make sure ngram counts are non-zero by printing the lengths
-    print("unigram counts: ", len(ngram_model.unigram_counts))
-    print("bigram counts: ", len(ngram_model.bigram_counts))
-    print("trigram counts: ", len(ngram_model.trigram_counts))
-
-    # calculate probabilities
-
-    '''
-    # print the first 10 bigram counts
-    for i, (unigram, count) in enumerate(ngram_model.unigram_counts.items()):
-        #print(unigram, count)
-        # probability of bigram
-        probability = ngram_model.calculate_probability(unigram)
-        print("probability of: ", unigram, " is ", probability)
-        # print("probability of: ", unigram, " is ", ngram_model.calculate_probability(unigram))
-        if i == 9:
-            break
-        '''
-
+    # Calculate perplexity for the example
+    perplexity = ngram_model.calculate_perplexity(preprocessed_example)
+    print(f"Perplexity of the {ngram_type} model for 'HDTV .': {perplexity}")
 
 if __name__ == "__main__":
     main()
