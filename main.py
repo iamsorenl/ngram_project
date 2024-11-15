@@ -1,5 +1,32 @@
 import sys
 
+def count_word_frequencies(features):
+    # Initialize an empty dictionary to store the word frequencies
+    word_frequencies = {}
+    
+    # Iterate over each sentence in the features
+    for sentence in features:
+        # Iterate over each word in the sentence
+        for word in sentence:
+            # Increment the frequency of the word by 1 (or set it to 1 if it doesn't exist)
+            # exclude <START> tokens from the word frequencies
+            if word != "<START>":
+                word_frequencies[word] = word_frequencies.get(word, 0) + 1
+    
+    # Collect words that have 3 occurrences or less
+    words_to_delete = []
+    for word, count in list(word_frequencies.items()):
+        if count < 3:
+            word_frequencies["<UNK>"] = word_frequencies.get("<UNK>", 0) + 1
+            words_to_delete.append(word)
+    
+    # Delete the collected words
+    for word in words_to_delete:
+        del word_frequencies[word]
+
+    return word_frequencies
+
+
 def extract_features(data, add_extra_start=False):
     features = []
     with open(data, 'r') as file:
@@ -44,9 +71,15 @@ def main():
     # Extract features for the training data
     features = extract_features(train_data, add_extra_start=add_extra_start)
     
-    # Print the first 50 features to verify
-    for sentence in features[:50]:
-        print(sentence, '\n')   
+    '''
+    # Print the first 10 features to verify
+    for i, sentence in enumerate(features[:10], start=1):
+        print(i, ": ", sentence, '\n')
+    '''
+
+    # Count the word frequencies in the features
+    word_frequencies = count_word_frequencies(features)
+    print("Number of unique words: ", len(word_frequencies))
 
 if __name__ == "__main__":
     main()
