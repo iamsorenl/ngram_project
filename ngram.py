@@ -2,7 +2,6 @@ class Ngram:
     def __init__(self, n):
         self.n = n  # Specifies the n-gram order (1 for unigram, 2 for bigram, etc.)
         self.ngram_counts = {}  # Dictionary to store counts of n-grams
-        self.total_counts = 0  # Total count of tokens (used for unigrams)
         self.word_frequencies = {}  # Dictionary to store word frequencies (including <UNK> handling)
         self.preprocessed_sentences = []  # List to store preprocessed sentences
 
@@ -48,5 +47,3 @@ class Ngram:
             for i in range(len(sentence) - self.n + 1):
                 ngram = tuple(sentence[i:i + self.n])
                 self.ngram_counts[ngram] = self.ngram_counts.get(ngram, 0) + 1
-                if self.n == 1:
-                    self.total_counts += 1  # Track total token count for unigrams

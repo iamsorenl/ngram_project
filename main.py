@@ -40,9 +40,5 @@ def main():
     print("Number of unique n-grams:", len(ngram_model.ngram_counts))
     print("Total n-gram count:", sum(ngram_model.ngram_counts.values()))
 
-    # Additional output for total token count (specific to unigrams)
-    if n == 1:
-        print("Total count of tokens (unigrams):", ngram_model.total_counts)
-
 if __name__ == "__main__":
     main()
