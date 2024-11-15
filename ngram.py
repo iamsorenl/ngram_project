@@ -36,9 +36,9 @@ class Ngram:
                 preprocessed_sentences.append(tokens)
         return preprocessed_sentences
 
-    def count_ngrams(self):
+    def count_ngrams(self, preprocessed_sentences):
         """Counts n-grams in the tokenized sentences."""
-        for sentence in self.preprocessed_sentences:
+        for sentence in preprocessed_sentences:
             for i in range(len(sentence)):
                 unigram = tuple(sentence[i:i + 1])
                 self.unigram_counts[unigram] = self.unigram_counts.get(unigram, 0) + 1
@@ -54,12 +54,25 @@ class Ngram:
     def calculate_probability(self, ngram):
         """Calculates the probability of a given n-gram."""
         if len(ngram) == 1:  # Unigram
-            count_ngram = self.unigram_counts.get(ngram, 0)  # Count of the n-gram
-            total_unigrams = sum(self.unigram_counts.values()) # denominator
+            count_ngram = self.unigram_counts.get(ngram, 0)  # Count of the unigram
+            total_unigrams = sum(self.unigram_counts.values())  # Total count of unigrams
             if total_unigrams == 0:  # Handle case where there are no unigrams
                 return 0
-            print("count_ngram: ", ngram, count_ngram)
-            print("total unigrams: ", total_unigrams)
             return count_ngram / total_unigrams
+        elif len(ngram) == 2:  # Bigram
+            count_ngram = self.bigram_counts.get(ngram, 0)  # Count of the bigram
+            preceding_word = (ngram[0],)  # Access preceding word as a tuple
+            count_preceding_word = self.unigram_counts.get(preceding_word, 0)  # Access the unigram count
+            if count_preceding_word == 0:  # Avoid division by zero
+                return 0
+            return count_ngram / count_preceding_word
+        elif len(ngram) == 3:  # Trigram
+            count_ngram = self.trigram_counts.get(ngram, 0) # Count of the trigram
+            preceding_bigram = (ngram[0], ngram[1]) # Access preceding bigram as a tuple
+            count_preceding_bigram = self.bigram_counts.get(preceding_bigram, 0)
+            if count_preceding_bigram == 0: # Avoid division by zero
+                return 0
+            return count_ngram / count_preceding_bigram
         return 0  # Return zero probability for unknown n-grams
+
 

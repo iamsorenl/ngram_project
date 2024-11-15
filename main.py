@@ -45,6 +45,15 @@ def main():
 
     print("preprocessed_sentence: ", preprocessed_sentences)
 
+    ngram_model.count_ngrams(preprocessed_sentences)
+
+    # make sure ngram counts are non-zero by printing the lengths
+    print("unigram counts: ", len(ngram_model.unigram_counts))
+    print("bigram counts: ", len(ngram_model.bigram_counts))
+    print("trigram counts: ", len(ngram_model.trigram_counts))
+
+    # calculate probabilities
+
     '''
     # print the first 10 bigram counts
     for i, (unigram, count) in enumerate(ngram_model.unigram_counts.items()):
