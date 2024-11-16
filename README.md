@@ -1,20 +1,24 @@
+
 ---
+
 ### README for N-Gram Language Model Project
+
 ---
 
 # N-Gram Language Model Implementation
 
-This project implements N-Gram language models (Unigram, Bigram, Trigram) and an Interpolated N-Gram model using Python. The models can calculate the probability of word sequences and estimate perplexity on a given dataset, with optional smoothing techniques to handle unseen data and improve generalization. The implementation includes command-line interface options to train and evaluate different models on specified datasets.
+This project implements N-Gram language models (Unigram, Bigram, Trigram) and an Interpolated N-Gram model using Python. The models calculate the probability of word sequences and estimate perplexity on a given dataset, with optional handling of out-of-vocabulary (OOV) words and smoothing techniques for better generalization. The implementation includes a command-line interface to train and evaluate different models on specified datasets.
 
 ---
 
 ## Table of Contents
 
 - [Project Overview](#project-overview)
+- [Requirements](#requirements)
 - [Installation](#installation)
 - [Dataset Structure](#dataset-structure)
 - [Usage](#usage)
-- [Command-Line Interface Help](#command-line-interface-help)
+- [Command-Line Interface](#command-line-interface)
 - [Models](#models)
 - [Evaluation](#evaluation)
 - [Smoothing Techniques](#smoothing-techniques)
@@ -24,17 +28,15 @@ This project implements N-Gram language models (Unigram, Bigram, Trigram) and an
 
 ## Project Overview
 
-N-Gram models are essential for language modeling, capturing probabilities of word sequences in a text corpus. This project supports:
+N-Gram models are used for language modeling by capturing probabilities of word sequences. This project supports:
 
 - **Unigram, Bigram, and Trigram Models** using Maximum Likelihood Estimation (MLE).
-- **Interpolated N-Gram Model** that combines multiple N-Gram models using linear interpolation for better predictions.
-- Evaluation using perplexity scores on different datasets.
+- **Interpolated N-Gram Model** combining multiple N-Gram models through linear interpolation for enhanced predictions.
+- Evaluation through perplexity scores on different datasets.
 
 ---
 
 ## Requirements
-
-To set up the project, ensure you have the following dependencies installed:
 
 - Python >= 3.7
 
@@ -42,11 +44,11 @@ To set up the project, ensure you have the following dependencies installed:
 
 ## Installation
 
-### 1. Clone the Repository
+### Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/unigram_bigram_trigram_smoothing_analysis.git
-cd unigram_bigram_trigram_smoothing_analysis
+git clone https://github.com/your-username/ngram_language_model.git
+cd ngram_language_model
 ```
 
 ---
@@ -55,9 +57,9 @@ cd unigram_bigram_trigram_smoothing_analysis
 
 Ensure the following files are present in the `A2-Data` directory:
 
-- `1b_benchmark.train.tokens`: Training dataset with tokenized sentences.
-- `1b_benchmark.dev.tokens`: Development dataset.
-- `1b_benchmark.test.tokens`: Test dataset.
+- `1b_benchmark.train.tokens`: Training data file with tokenized sentences.
+- `1b_benchmark.dev.tokens`: Development data file.
+- `1b_benchmark.test.tokens`: Test data file.
 
 ---
 
@@ -65,65 +67,61 @@ Ensure the following files are present in the `A2-Data` directory:
 
 ### Running the Model
 
-The script can be run using the following command:
+Use the following command to run the script:
 
 ```bash
-python main.py --model <model_type> --smoothing <smoothing_value> --set <dataset_type>
+python main.py --model <model_type> --set <dataset_type> --oov_threshold <threshold> --l1 <weight1> --l2 <weight2> --l3 <weight3>
 ```
 
 #### Command-Line Arguments:
 
 - `--model`: Specifies the N-Gram model to use (`unigram`, `bigram`, `trigram`, `interpolate`).
-- `--smoothing`: Specifies the additive smoothing value (float).
 - `--set`: Chooses which dataset to evaluate (`train`, `dev`, `test`).
+- `--oov_threshold`: Specifies the OOV threshold for replacing rare words with `<UNK>`.
+- `--l1`, `--l2`, `--l3`: Weights for the unigram, bigram, and trigram probabilities in the interpolation model (must sum to 1).
 
 #### Example Usage:
 
+To run a trigram model with an OOV threshold of 3 on the development set:
+
 ```bash
-python main.py --model bigram --smoothing 0.1 --set dev
+python main.py --model trigram --set dev --oov_threshold 3
 ```
 
-This command trains a bigram model with a smoothing value of 0.1 and evaluates on the development set.
+To run an interpolated model with specified weights:
+
+```bash
+python main.py --model interpolate --l1 0.2 --l2 0.3 --l3 0.5 --set test
+```
 
 ---
 
-## Command-Line Interface Help
+## Command-Line Interface
 
-To view the available options for running the `main.py` script, you can use the `-h` flag for help. This will display the available arguments and their usage as follows:
+Use the `-h` flag to view available options:
 
 ```bash
 python main.py -h
 ```
 
-This command will produce the following output:
+This outputs:
 
 ```
-usage: main.py [-h] --model {unigram,bigram,trigram,interpolate} --smoothing SMOOTHING --set {train,dev,test}
+usage: main.py [-h] [--model {unigram,bigram,trigram,interpolate}] [--set {train,dev,test}] [--fraction FRACTION] [--oov_threshold OOV_THRESHOLD] [--l1 L1] [--l2 L2] [--l3 L3]
 
 N-Gram Language Model Trainer and Evaluator
 
 options:
   -h, --help            show this help message and exit
-  --model {unigram,bigram,trigram,interpolate}, -f {unigram,bigram,trigram,interpolate}
-                        Specify the type of n-gram model to use: unigram, bigram, trigram, or interpolate.
-  --smoothing SMOOTHING
-                        Additive smoothing value.
+  --model {unigram,bigram,trigram,interpolate}
+                        Specify the type of n-gram model to use.
   --set {train,dev,test}
-                        Choose which dataset to evaluate: train, dev, or test.
-```
-
-#### Explanation of Command-Line Arguments:
-
-- `--model, -f`: Specifies the type of n-gram model to use. Options are `unigram`, `bigram`, `trigram`, and `interpolate`.
-- `--smoothing`: Specifies the additive smoothing value (float). This value controls how probabilities are smoothed to handle unseen n-grams.
-- `--set`: Chooses which dataset to evaluate. Options are `train`, `dev`, or `test`.
-
-#### Example Usage:
-
-To run a bigram model with additive smoothing of 0.1 and evaluate it on the development dataset:
-
-```bash
-python main.py --model bigram --smoothing 0.1 --set dev
+                        Choose which dataset to evaluate.
+  --fraction FRACTION   Fraction of the dataset to use (default: 1.0).
+  --oov_threshold OOV_THRESHOLD
+                        Specify the OOV threshold.
+  --l1 L1, --l2 L2, --l3 L3
+                        Weights for the unigram, bigram, and trigram probabilities.
 ```
 
 ---
@@ -131,71 +129,52 @@ python main.py --model bigram --smoothing 0.1 --set dev
 ## Models
 
 ### Unigram Model
-
 - Calculates word probabilities independently.
-- Handles out-of-vocabulary (OOV) words using `<UNK>` tokens.
+- Handles out-of-vocabulary words using the `<UNK>` token.
 
 ### Bigram Model
-
 - Considers pairs of consecutive words.
-- Provides context-based word probabilities.
+- Improves predictions by incorporating context.
 
 ### Trigram Model
-
-- Considers triplets of words for context.
-- Provides more accurate predictions for sequences of three words.
+- Considers sequences of three words for context.
+- Provides more accurate predictions than unigram and bigram models.
 
 ### Interpolated N-Gram Model
-
-- Combines Unigram, Bigram, and Trigram models using linear interpolation.
-- Provides robust predictions even for sparse data by leveraging lower-order models.
+- Combines probabilities from Unigram, Bigram, and Trigram models.
+- Uses specified weights for interpolation.
 
 ---
 
 ## Evaluation
 
-### Metrics
-
-The models are evaluated using **perplexity**, which measures how well the probability model predicts a sample. Lower perplexity indicates better generalization.
+The models are evaluated using **perplexity**, a measure of how well a probability model predicts a test sample. Lower perplexity indicates better generalization and prediction capabilities.
 
 ---
 
 ## Smoothing Techniques
 
-### Additive Smoothing
-
-- Additive (Laplace) smoothing is used to handle zero-probability issues for unseen n-grams.
+### Handling OOV Words
+- The `oov_threshold` parameter specifies the minimum number of occurrences a word must have to avoid being replaced with `<UNK>`.
 
 ### Linear Interpolation
-
-- Combines probabilities from Unigram, Bigram, and Trigram models using specified weights to enhance model robustness.
+- Combines probabilities from different N-Gram models using specified weights (`l1`, `l2`, `l3`).
 
 ---
 
 ## Limitations and Future Work
 
-- **Data Sparsity**: Higher-order models like the Trigram may suffer from data sparsity.
-- **Hyperparameter Tuning**: Automated techniques for tuning interpolation weights can be explored.
-- **Expansion**: Consideration for integrating advanced models like Neural Language Models (e.g., RNNs, Transformers).
+- **Data Sparsity**: Higher-order models like Trigrams may face data sparsity.
+- **Hyperparameter Tuning**: Automated tuning methods for interpolation weights could improve results.
+- **Expansion**: Incorporation of advanced models like Neural Language Models could enhance performance.
 
 ---
 
 ### Example Code Walkthrough
 
-#### Feature Extraction
-
-The `feature_extractor` function processes sentences and appends `<START>` and `<STOP>` tokens to mark sentence boundaries.
-
-#### Model Training and Evaluation
-
-Each N-Gram model inherits from a base `NGram` class and implements methods for:
-
-- Reading and counting n-grams.
-- Calculating probabilities.
-- Evaluating log-likelihood and perplexity.
-
-#### Linear Interpolation
-
-The `InterpolatedNGram` class combines Unigram, Bigram, and Trigram probabilities using user-specified weights for robust predictions.
+The provided code includes:
+- **`feature_extractor`**: Processes and tokenizes text, adding `<START>` and `<STOP>` tokens.
+- **Model Classes**: Inherits from a base `NGram` class, providing methods for reading and counting n-grams, calculating probabilities, and estimating perplexity.
+- **Linear Interpolation**: Combines multiple N-Gram models for robust predictions.
 
 ---
