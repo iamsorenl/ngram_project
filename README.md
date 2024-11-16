@@ -11,7 +11,6 @@ This project implements N-Gram language models (Unigram, Bigram, Trigram) and an
 ## Table of Contents
 
 - [Project Overview](#project-overview)
-- [Requirements](#requirements)
 - [Installation](#installation)
 - [Dataset Structure](#dataset-structure)
 - [Usage](#usage)
@@ -37,13 +36,6 @@ N-Gram models are essential for language modeling, capturing probabilities of wo
 To set up the project, ensure you have the following dependencies installed:
 
 - Python >= 3.7
-- NumPy
-
-You can install the necessary packages using:
-
-```bash
-pip install -r requirements.txt
-```
 
 ---
 
@@ -52,8 +44,8 @@ pip install -r requirements.txt
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/ngram-model.git
-cd ngram-model
+git clone https://github.com/iamsorenl/unigram_bigram_trigram_smoothing_analysis.git
+cd unigram_bigram_trigram_smoothing_analysis
 ```
 
 ---
