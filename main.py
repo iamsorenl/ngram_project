@@ -17,16 +17,15 @@ def feature_extractor(filepath):
 
 def main():
     parser = argparse.ArgumentParser(description="N-Gram Language Model Trainer and Evaluator")
-    parser.add_argument('--model', '-f', type=str, required=True,
+    parser.add_argument('--model', '-f', type=str, default='unigram',
                         choices=['unigram', 'bigram', 'trigram', 'interpolate'],
-                        help='Specify the type of n-gram model to use: unigram, bigram, trigram, or interpolate.')
-    parser.add_argument('--smoothing', type=float, required=True, help='Additive smoothing value.')
-    parser.add_argument('--set', type=str, required=True,
+                        help='Specify the type of n-gram model to use: unigram, bigram, trigram, or interpolate (default: unigram).')
+    parser.add_argument('--set', type=str, default='dev',
                         choices=['train', 'dev', 'test'],
-                        help='Choose which dataset to evaluate: train, dev, or test.')
+                        help='Choose which dataset to evaluate: train, dev, or test (default: dev).')
     args = parser.parse_args()
 
-    print(args)
+    print(f"\n{args}\n")
 
     # Convert text into features using fixed A2-Data path
     train = feature_extractor("A2-Data/1b_benchmark.train.tokens")
@@ -44,15 +43,15 @@ def main():
     else:
         raise Exception("Pass unigram, bigram, trigram, or interpolate to --model")
 
-    print(f"EVALUATING THE {args.set} DATASET")
+    print(f"Evaluating the {args.set} dataset using the {args.model} model\n")
 
     if args.model != 'interpolate':
         vocab_size = model.read_ngram(train)
         print(f"There are {vocab_size} unique tokens in the {args.model} model (excluding \"<START>\")")
         vocab = model.get_vocab()
         print(f"There are {vocab} tokens in the vocabulary")
-        print(f"With Additive Smoothing (alpha) = {args.smoothing}:")
-        perplexity = model.model_perplexity(validate, args.smoothing)
+
+        perplexity = model.model_perplexity(validate)
         print(f"Perplexity of {args.model} model on the {args.set} data is {perplexity}")
 
         test = "<START> HDTV . <STOP>"
