@@ -1,57 +1,72 @@
-import sys
-from ngram import Ngram
+import argparse
+from ngrams import *
+import numpy as np
+
+def feature_extractor(filepath):
+    """
+    Takes in the file and parses the sentences using <space> as a delimiter.
+    Returns a tokenized version of the inputs with the <START> and <STOP> tokens appended.
+    """
+    features = []
+    with open(filepath, "r", encoding='UTF-8') as f:
+        for line in f:
+            splitted = line.strip().split(" ")
+            words = [word for word in splitted]
+            words = ["<START>"] + words + ["<STOP>"]
+            features.append(words)
+    return features
 
 def main():
-    # Check if the correct number of arguments is provided
-    if len(sys.argv) != 2:
-        print("Usage: python main.py <ngram_type>")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(description="N-Gram Language Model Trainer and Evaluator")
+    parser.add_argument('--model', '-f', type=str, required=True,
+                        choices=['unigram', 'bigram', 'trigram', 'interpolate'],
+                        help='Specify the type of n-gram model to use: unigram, bigram, trigram, or interpolate.')
+    parser.add_argument('--smoothing', type=float, required=True, help='Additive smoothing value.')
+    parser.add_argument('--set', type=str, required=True,
+                        choices=['train', 'dev', 'test'],
+                        help='Choose which dataset to evaluate: train, dev, or test.')
+    args = parser.parse_args()
 
-    # Retrieve the ngram type from command line arguments
-    ngram_type = sys.argv[1]
+    print(args)
 
-    # Validate ngram_type and set n-gram order accordingly
-    if ngram_type == "unigram":
-        n = 1
-    elif ngram_type == "bigram":
-        n = 2
-    elif ngram_type == "trigram":
-        n = 3
+    # Convert text into features using fixed A2-Data path
+    train = feature_extractor("A2-Data/1b_benchmark.train.tokens")
+    validate = feature_extractor(f"A2-Data/1b_benchmark.{args.set}.tokens")
+
+    # Instantiate the model based on the selected argument
+    if args.model == "unigram":
+        model = Unigram()
+    elif args.model == "bigram":
+        model = Bigram()
+    elif args.model == "trigram":
+        model = Trigram()
+    elif args.model == 'interpolate':
+        model = InterpolatedNGram()
     else:
-        print("Error: Invalid ngram_type. Please choose from 'unigram', 'bigram', or 'trigram'.")
-        sys.exit(1)
+        raise Exception("Pass unigram, bigram, trigram, or interpolate to --model")
 
-    # Initialize the Ngram model
-    ngram_model = Ngram(n)
+    print(f"EVALUATING THE {args.set} DATASET")
 
-    # Tokenize and prepare the training data
-    training_data_file = "A2-Data/1b_benchmark.train.tokens"
-    train_sentences = ngram_model.tokenize_and_count(training_data_file)
-    # print("train_sentence before:", train_sentences[0])
-    train_sentences = ngram_model.replace_with_unk(train_sentences)
-    # print("train_sentence after:", train_sentences[0])
+    if args.model != 'interpolate':
+        vocab_size = model.read_ngram(train)
+        print(f"There are {vocab_size} unique tokens in the {args.model} model (excluding \"<START>\")")
+        vocab = model.get_vocab()
+        print(f"There are {vocab} tokens in the vocabulary")
+        print(f"With Additive Smoothing (alpha) = {args.smoothing}:")
+        perplexity = model.model_perplexity(validate, args.smoothing)
+        print(f"Perplexity of {args.model} model on the {args.set} data is {perplexity}")
 
-    # frequencies
-    print("word frequency length:", len(ngram_model.word_frequencies))
-    print("word frequency length with <UNK>:", len(ngram_model.word_frequencies_unk))
+        test = "<START> HDTV . <STOP>"
+        perplexity = model.model_perplexity([test.split(" ")])
+        print(f"Perplexity of {args.model} model for the string \"{test}\" is {perplexity}")
 
-    # count ngrams in the training data
-    ngram_model.count_ngrams(train_sentences)
+    else:
+        model.train(train)
+        test = ["<START> HDTV . <STOP>".split(" ")]
+        perplexity = model.interpolate(0.1, 0.3, 0.6, test)
+        print(f"Perplexity of {args.model} model for the string \"{test}\" is {perplexity}")
+        perplexity = model.interpolate(0.1, 0.3, 0.6, validate)
+        print(f"Perplexity of {args.model} model for the {args.set} dataset is {perplexity}")
 
-    # length of each ngram
-    print("unigram length:", len(ngram_model.unigram_counts))
-    print("bigram length:", len(ngram_model.bigram_counts))
-    print("trigram length:", len(ngram_model.trigram_counts))
-
-    # calculate perplexity
-    #perplexity_train = ngram_model.calculate_perplexity(train_sentences)
-    #print(f"Perplexity on training data: {perplexity_train}")
-    
-    # HDTV test
-    example_sentence = [["<START>", "HDTV", ".", "<STOP>"]]
-    perplexity_example = ngram_model.calculate_perplexity(example_sentence)
-    print(f"Perplexity of the example 'HDTV .': {perplexity_example}")
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
