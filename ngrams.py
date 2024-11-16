@@ -49,6 +49,10 @@ class Unigram(NGram):
         self.vocab_size = None
         
     def read_ngram(self, features):
+        """
+        Reads the features and counts the occurrences of each word.
+        Words with less than 3 occurrences are treated as unknown.
+        """
         initial_unigram = {"<START>": 0, "<STOP>" : 0}
         for sentence in features:
             for word in sentence:
@@ -68,21 +72,33 @@ class Unigram(NGram):
         return len(self.unigram) - 1    
     
     def probability(self, word, smoothing=0):
+        """
+        Calculates the probability of a word with optional smoothing.
+        """
         if word in self.unigram:
             return (self.unigram[word] + smoothing) / (self.num_words + (smoothing * self.vocab_size))
         else:
             return (self.unigram["<UNK>"] + smoothing) / (self.num_words + (smoothing * self.vocab_size))
 
     def calc_loglikelihoods(self, sentence, smoothing=0):
+        """
+        Calculates the log likelihood of a sentence.
+        """
         llp = 0
         for word in sentence[1:]:
             llp += np.log2(self.probability(word, smoothing))
         return llp
 
     def get_unigram(self):
+        """
+        Returns the unigram dictionary.
+        """
         return self.unigram
 
     def get_vocab(self):
+        """
+        Returns the vocabulary size.
+        """
         return self.vocab_size
 
 class Bigram(NGram):
@@ -94,6 +110,9 @@ class Bigram(NGram):
         self.vocab_size = None
 
     def read_ngram(self, features):
+        """
+        Reads the features and counts the occurrences of each bigram.
+        """
         for sentence in features:
             for i, word in enumerate(sentence[:-1]):
                 bi = (word, sentence[i+1])
@@ -108,12 +127,18 @@ class Bigram(NGram):
         return len(self.bigram)
 
     def probability(self, words, smoothing=0):
+        """
+        Calculates the probability of a bigram with optional smoothing.
+        """
         if words[0] in self.unigram.get_unigram():
             return (self.bigram[words] + smoothing) / (self.unigram.get_unigram()[words[0]] + (smoothing * self.vocab_size))
         else:
             return (self.bigram[words] + smoothing) / (self.unigram.get_unigram()["<UNK>"] + (smoothing * self.vocab_size))
 
     def calc_loglikelihoods(self, sentence, smoothing=0):
+        """
+        Calculates the log likelihood of a sentence.
+        """
         llp = 0
         unigram = self.unigram.get_unigram()
         for i, word in enumerate(sentence[:-1]):
@@ -123,9 +148,15 @@ class Bigram(NGram):
         return llp
 
     def get_vocab(self):
+        """
+        Returns the vocabulary size.
+        """
         return self.vocab_size
     
     def get_bigram(self):
+        """
+        Returns the bigram dictionary.
+        """
         return self.bigram
     
     
@@ -138,6 +169,9 @@ class Trigram(NGram):
         self.vocab_size = None
     
     def read_ngram(self, features):
+        """
+        Reads the features and counts the occurrences of each trigram.
+        """
         for sentence in features:
             for i, word in enumerate(sentence[:-2]):
                 tri = (word, sentence[i+1], sentence[i+2])
@@ -152,9 +186,15 @@ class Trigram(NGram):
         return len(self.trigram)
 
     def probability(self, words, smoothing=0):
+        """
+        Calculates the probability of a trigram with optional smoothing.
+        """
         return (self.trigram[words] + smoothing) / (self.bigram.get_bigram()[(words[0], words[1])] + (smoothing * self.vocab_size))
 
     def calc_loglikelihoods(self, sentence, smoothing=0):
+        """
+        Calculates the log likelihood of a sentence.
+        """
         bigram = self.bigram.get_bigram()
         first = tuple(sentence[0:2])
         if first in bigram:
@@ -168,9 +208,15 @@ class Trigram(NGram):
         return llp
 
     def get_trigram(self):
+        """
+        Returns the trigram dictionary.
+        """
         return self.trigram
     
     def get_vocab(self):
+        """
+        Returns the vocabulary size.
+        """
         return self.vocab_size
 
 class InterpolatedNGram():
@@ -181,11 +227,17 @@ class InterpolatedNGram():
         self.trigram = Trigram()
 
     def train(self, features):
+        """
+        Trains the unigram, bigram, and trigram models with the given features.
+        """
         self.unigram.read_ngram(features)
         self.bigram.read_ngram(features)
         self.trigram.read_ngram(features)
 
     def calc_loglikelihoods(self, sentence, lams):
+        """
+        Calculates the log likelihood of a sentence using interpolation.
+        """
         l1, l2, l3 = lams
         bigram = self.bigram.get_bigram()
         unigram = self.unigram.get_unigram()
@@ -213,6 +265,9 @@ class InterpolatedNGram():
         return llp
 
     def interpolate(self, lam1, lam2, lam3, predict):
+        """
+        Interpolates the probabilities using the given lambda values and calculates the perplexity.
+        """
         assert lam1 + lam2 + lam3 == 1
         llp = 0
         M = 0
@@ -221,4 +276,3 @@ class InterpolatedNGram():
             M += len(sentence) - 1
         avg_llp = (- 1. / M) * llp
         return 2. ** avg_llp
-

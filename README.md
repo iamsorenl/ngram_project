@@ -1,5 +1,6 @@
+ 
+---
 ### README for N-Gram Language Model Project
-
 ---
 
 # N-Gram Language Model Implementation
@@ -14,6 +15,7 @@ This project implements N-Gram language models (Unigram, Bigram, Trigram) and an
 - [Installation](#installation)
 - [Dataset Structure](#dataset-structure)
 - [Usage](#usage)
+- [Command-Line Interface Help](#command-line-interface-help)
 - [Models](#models)
 - [Evaluation](#evaluation)
 - [Smoothing Techniques](#smoothing-techniques)
@@ -83,6 +85,47 @@ python main.py --model bigram --smoothing 0.1 --set dev
 ```
 
 This command trains a bigram model with a smoothing value of 0.1 and evaluates on the development set.
+
+---
+
+## Command-Line Interface Help
+
+To view the available options for running the `main.py` script, you can use the `-h` flag for help. This will display the available arguments and their usage as follows:
+
+```bash
+python main.py -h
+```
+
+This command will produce the following output:
+
+```
+usage: main.py [-h] --model {unigram,bigram,trigram,interpolate} --smoothing SMOOTHING --set {train,dev,test}
+
+N-Gram Language Model Trainer and Evaluator
+
+options:
+  -h, --help            show this help message and exit
+  --model {unigram,bigram,trigram,interpolate}, -f {unigram,bigram,trigram,interpolate}
+                        Specify the type of n-gram model to use: unigram, bigram, trigram, or interpolate.
+  --smoothing SMOOTHING
+                        Additive smoothing value.
+  --set {train,dev,test}
+                        Choose which dataset to evaluate: train, dev, or test.
+```
+
+#### Explanation of Command-Line Arguments:
+
+- `--model, -f`: Specifies the type of n-gram model to use. Options are `unigram`, `bigram`, `trigram`, and `interpolate`.
+- `--smoothing`: Specifies the additive smoothing value (float). This value controls how probabilities are smoothed to handle unseen n-grams.
+- `--set`: Chooses which dataset to evaluate. Options are `train`, `dev`, or `test`.
+
+#### Example Usage:
+
+To run a bigram model with additive smoothing of 0.1 and evaluate it on the development dataset:
+
+```bash
+python main.py --model bigram --smoothing 0.1 --set dev
+```
 
 ---
 
