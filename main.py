@@ -1,6 +1,5 @@
 import argparse
 from ngrams import *
-import numpy as np
 
 def feature_extractor(filepath):
     """
@@ -8,7 +7,7 @@ def feature_extractor(filepath):
     Returns a tokenized version of the inputs with the <START> and <STOP> tokens appended.
     """
     features = []
-    with open(filepath, "r", encoding='UTF-8') as f:
+    with open(filepath, "r") as f:
         for line in f:
             splitted = line.strip().split(" ")
             words = [word for word in splitted]
