@@ -1,4 +1,3 @@
- 
 ---
 ### README for N-Gram Language Model Project
 ---
@@ -46,7 +45,7 @@ To set up the project, ensure you have the following dependencies installed:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/iamsorenl/unigram_bigram_trigram_smoothing_analysis.git
+git clone https://github.com/your-username/unigram_bigram_trigram_smoothing_analysis.git
 cd unigram_bigram_trigram_smoothing_analysis
 ```
 
