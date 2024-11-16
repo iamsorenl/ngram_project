@@ -1,3 +1,4 @@
+'''Go to line 49 to adjust the OOV <UNK> threshold. The default is 3.'''
 import numpy as np
 
 class NGram(object):
@@ -29,10 +30,11 @@ class NGram(object):
 
 
 class Unigram(NGram):
-    def __init__ (self):
+    def __init__ (self, oov_threshold=3):
         self.unigram = {"<START>": 0, "<STOP>" : 0, "<UNK>" : 0}
         self.num_words = 0
         self.vocab_size = None
+        self.oov_threshold = oov_threshold
         
     def read_ngram(self, features):
         """
@@ -45,7 +47,7 @@ class Unigram(NGram):
                 initial_unigram[word] = initial_unigram.get(word, 0) + 1
 
         for key, val in initial_unigram.items():
-            if val < 3:
+            if val < self.oov_threshold:
                 self.unigram["<UNK>"] += val
             else:
                 self.unigram[key] = val
@@ -85,9 +87,9 @@ class Unigram(NGram):
         return self.vocab_size
 
 class Bigram(NGram):
-    def __init__ (self):
+    def __init__ (self, oov_threshold=3):
         self.bigram = {}
-        self.unigram = Unigram()
+        self.unigram = Unigram(oov_threshold=oov_threshold)
         self.num_words = 0
         self.vocab_size = None
 
@@ -139,9 +141,9 @@ class Bigram(NGram):
     
     
 class Trigram(NGram):
-    def __init__ (self):
+    def __init__ (self, oov_threshold=3):
         self.trigram = {}
-        self.bigram = Bigram()
+        self.bigram = Bigram(oov_threshold=oov_threshold)
         self.num_words = 0
         self.vocab_size = None
     
@@ -198,10 +200,10 @@ class Trigram(NGram):
         return self.vocab_size
 
 class InterpolatedNGram():
-    def __init__ (self):
-        self.unigram = Unigram()
-        self.bigram = Bigram()
-        self.trigram = Trigram()
+    def __init__ (self, oov_threshold=3):
+        self.unigram = Unigram(oov_threshold=oov_threshold)
+        self.bigram = Bigram(oov_threshold=oov_threshold)
+        self.trigram = Trigram(oov_threshold=oov_threshold)
 
     def train(self, features):
         """
