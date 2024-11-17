@@ -40,8 +40,12 @@ def main():
         raise ValueError("Lambda values must be between 0 and 1.")
     if abs(args.l1 + args.l2 + args.l3 - 1) > 1e-5:
         raise ValueError("Lambda values must sum to 1.")
-
-    print(f"\n{args}\n")
+    if args.model in ["unigram", "bigram", "trigram"]:
+        if args.l1 != 0.1 or args.l2 != 0.3 or args.l3 != 0.6:
+            raise ValueError(f"{args.model} does not require lambda values.")
+        print(f"\n{argparse.Namespace(model=args.model, set=args.set, fraction=args.fraction, oov_threshold=args.oov_threshold)}\n")
+    else:
+        print(f"\n{args}\n")
 
     # Convert text into features using fixed A2-Data path
     train = feature_extractor("A2-Data/1b_benchmark.train.tokens", args.fraction)

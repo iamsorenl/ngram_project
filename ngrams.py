@@ -218,13 +218,10 @@ class InterpolatedNGram():
         Calculates the log likelihood of a sentence using interpolation.
         """
         l1, l2, l3 = lams
-        bigram = self.bigram.get_bigram()
-        unigram = self.unigram.get_unigram()
-        trigram = self.trigram.get_trigram()
         first_two = tuple(sentence[0:2])
 
         llp = 0
-        if first_two in bigram:
+        if first_two in self.bigram.get_bigram():
             pbi = self.bigram.probability(first_two)
             pun = self.unigram.probability(sentence[1])
             ptri = pbi
