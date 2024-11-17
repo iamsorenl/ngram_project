@@ -12,7 +12,7 @@ def feature_extractor(filepath, fraction=1.0):
         lines = f.readlines()
         lines = lines[:int(len(lines) * fraction)]
         for line in lines:
-            splitted = line.strip().split(" ")
+            splitted = line.strip().split()
             words = [word for word in splitted]
             words = ["<START>"] + words + ["<STOP>"]
             features.append(words)
@@ -63,7 +63,7 @@ def main():
 
     if args.model == 'interpolate':
         model.train(train)
-        test = ["<START> HDTV . <STOP>".split(" ")]
+        test = ["<START> HDTV . <STOP>".split()]
         perplexity = model.interpolate(0.1, 0.3, 0.6, test)
         print(f"Perplexity of {args.model} model for the string \"{test}\" is {perplexity}")
         perplexity = model.interpolate(args.l1, args.l2, args.l3, validate)
@@ -78,7 +78,7 @@ def main():
         print(f"Perplexity of {args.model} model on the {args.set} data is {perplexity}")
 
         test = "<START> HDTV . <STOP>"
-        perplexity = model.model_perplexity([test.split(" ")])
+        perplexity = model.model_perplexity([test.split()])
         print(f"Perplexity of {args.model} model for the string \"{test}\" is {perplexity}")
 
 if __name__ == '__main__':
