@@ -28,7 +28,6 @@ class NGram(object):
         avg_llp = (- 1. / M) * llp
         return 2. ** avg_llp
 
-
 class Unigram(NGram):
     def __init__ (self, oov_threshold=3):
         self.unigram = {"<START>": 0, "<STOP>" : 0, "<UNK>" : 0}
@@ -138,7 +137,6 @@ class Bigram(NGram):
         Returns the bigram dictionary.
         """
         return self.bigram
-    
     
 class Trigram(NGram):
     def __init__ (self, oov_threshold=3):
